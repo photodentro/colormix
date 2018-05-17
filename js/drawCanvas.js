@@ -88,56 +88,56 @@ targetcmyks['M'] = 0;
 targetcmyks['Y'] = 0;
 targetcmyks['K'] = 0;
 
+//code from https://github.com/bahamas10/node-ryb2rgb/blob/master/ryb2rgb.js
+//thanks @alkisg
+function cubicInt(t, A, B){
+    var weight = t*t*(3-2*t);
+    return A + weight*(B-A);
+}
+
+  function getR(iR, iY, iB) {
+    // red
+    var x0 = cubicInt(iB, 1.0, 0.163);
+    var x1 = cubicInt(iB, 1.0, 0.0);
+    var x2 = cubicInt(iB, 1.0, 0.5);
+    var x3 = cubicInt(iB, 1.0, 0.2);
+    var y0 = cubicInt(iY, x0, x1);
+    var y1 = cubicInt(iY, x2, x3);
+    return Math.ceil (255 * cubicInt(iR, y0, y1));
+  }
+
+  function getG(iR, iY, iB) {
+    // green
+    var x0 = cubicInt(iB, 1.0, 0.373);
+    var x1 = cubicInt(iB, 1.0, 0.66);
+    var x2 = cubicInt(iB, 0.0, 0.0);
+    var x3 = cubicInt(iB, 0.5, 0.094);
+    var y0 = cubicInt(iY, x0, x1);
+    var y1 = cubicInt(iY, x2, x3);
+    return Math.ceil (255 * cubicInt(iR, y0, y1));
+  }
+
+  function getB(iR, iY, iB) {
+    // blue
+    var x0 = cubicInt(iB, 1.0, 0.6);
+    var x1 = cubicInt(iB, 0.0, 0.2);
+    var x2 = cubicInt(iB, 0.0, 0.5);
+    var x3 = cubicInt(iB, 0.0, 0.0);
+    var y0 = cubicInt(iY, x0, x1);
+    var y1 = cubicInt(iY, x2, x3);
+    return Math.ceil (255 * cubicInt(iR, y0, y1));
+  }
+
+
+
 function ryb2hex(cmyksDict){
 	r = cmyksDict['M']/100;
 	y = cmyksDict['Y']/100;
 	b = cmyksDict['C']/100;
-	var white = [1, 1, 1];
-	var red = [1, 0, 0];
-	var yellow = [1, 1, 0];
-	var blue = [0.163, 0.373, 0.6];
-	var violet = [0.5, 0, 0.5];
-	var green = [0, 0.66, 0.2];
-	var orange = [1, 0.5, 0];
-	var black = [0.2, 0.094, 0.0];
-	var i;
-
-	i = 0;
-	var wred = white[i] * (1 - r) * (1 - b) * (1 - y);
-	var rred = red[i] * r * (1 - b) * (1 - y);
-	var bred = blue[i] * (1 - r) * b * (1 - y);
-	var vred = violet[i] * r * b * (1 - y);
-	var yred = yellow[i] * (1 - r) * (1 - b) * y;
-	var ored = orange[i] * r * (1 - b) * y;
-	var gred = green[i] * (1 - r) * b * y;
-	var kred = black[i] * r * b * y;
-	rgb_red =  wred+rred+bred+vred+yred+ored+gred+kred;
-
-	i = 1;
-	var wgreen = white[i] * (1 - r) * (1 - b) * (1 - y);
-	var rgreen = red[i] * r * (1 - b) * (1 - y);
-	var bgreen = blue[i] * (1 - r) * b * (1 - y);
-	var vgreen = violet[i] * r * b * (1 - y);
-	var ygreen = yellow[i] * (1 - r) * (1 - b) * y;
-	var ogreen = orange[i] * r * (1 - b) * y;
-	var ggreen = green[i] * (1 - r) * b * y;
-	var kgreen = black[i] * r * b * y;
-	rgb_green =  wgreen+rgreen+bgreen+vgreen+ygreen+ogreen+ggreen+kgreen;
-
-	i = 2;
-	var wblue = white[i] * (1 - r) * (1 - b) * (1 - y);
-	var rblue = red[i] * r * (1 - b) * (1 - y);
-	var bblue = blue[i] * (1 - r) * b * (1 - y);
-	var vblue = violet[i] * r * b * (1 - y);
-	var yblue = yellow[i] * (1 - r) * (1 - b) * y;
-	var oblue = orange[i] * r * (1 - b) * y;
-	var gblue = green[i] * (1 - r) * b * y;
-	var kblue = black[i] * r * b * y;
-	rgb_blue =  wblue+rblue+bgreen+vblue+yblue+oblue+gblue+kblue;
-
-	rgb_red   = Math.floor(255*rgb_red);
-	rgb_green = Math.floor(255*rgb_green);
-	rgb_blue  = Math.floor(255*rgb_blue);
+	rgb_red   = getR(r,y,b);
+	rgb_green = getG(r,y,b);
+	rgb_blue  = getB(r,y,b);
+	
 	var rStr = Math.floor(rgb_red).toString(16);
   	var gStr = Math.floor(rgb_green).toString(16);
   	var bStr = Math.floor(rgb_blue).toString(16);
@@ -167,7 +167,7 @@ function cmyktoHex(cmyksDict){
     rStr = "0"+rStr;}
   if (gStr.length == 1){
     gStr = "0"+gStr;}
-  if (bStr.length == 1){
+  if (bStr.lengtoh == 1){
     bStr = "0"+bStr;}
   var retStr = "#" + rStr + gStr + bStr;
   return(retStr);
