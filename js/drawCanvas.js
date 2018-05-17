@@ -1,13 +1,12 @@
-//todo: change the color picking from random
-//to simple color wheel
-//http://www.colorwithleo.com/art_colorwheel.php
-
-
 //drawing.js
 //the functions that draw on the canvas
 var c = document.getElementById('myCanvas');
 var ctx = c.getContext("2d");
-var diff = 25;
+
+
+
+var diffLevels = [33,25,17,10,5];
+var diff = diffLevels[0];
 c.width = 500;
 c.height = 500;
 
@@ -167,7 +166,7 @@ function cmyktoHex(cmyksDict){
     rStr = "0"+rStr;}
   if (gStr.length == 1){
     gStr = "0"+gStr;}
-  if (bStr.lengtoh == 1){
+  if (bStr.length == 1){
     bStr = "0"+bStr;}
   var retStr = "#" + rStr + gStr + bStr;
   return(retStr);
@@ -176,34 +175,40 @@ function cmyktoHex(cmyksDict){
 function changeColor(changeId){
 	if (changeId!=""){
     if (changeId[1] == '+'){
-      if (cmyks[changeId[0]]<100)
-        cmyks[changeId[0]] += diff;
+    	cmyks[changeId[0]] += diff;
+      	if (cmyks[changeId[0]]>100)
+        	cmyks[changeId[0]] -= diff;
     }
     else{
-      if (cmyks[changeId[0]]>diff)
-        cmyks[changeId[0]] -= diff;
+    	cmyks[changeId[0]] -= diff;
+      	if (cmyks[changeId[0]]<0)
+      		cmyks[changeId[0]] += diff;
     }
   }
+  console.log(cmyks);
 }
 
 
-function randomColor(){
-	possibleColors = 100 / diff;
-	rColor = Math.floor(Math.random()*possibleColors);
-	return(rColor*diff);
-}
-
-function randomTargetCmyk(){
-	targetcmyks['C'] = randomColor();
-	targetcmyks['M'] = randomColor();
-	targetcmyks['Y'] = randomColor();
+function randomTargetCmyk(diff){
+	/*create random color by clicking random + on the three colors
+	*/
+	maxClicks = Math.floor(100.0/diff);
+	randomClicks = Math.floor(Math.random()*maxClicks);
+	targetcmyks['C'] = diff*randomClicks;
+	console.log(randomClicks);
+	randomClicks = Math.floor(Math.random()*maxClicks);
+	targetcmyks['M'] = diff*randomClicks;
+	console.log(randomClicks);
+	randomClicks = Math.floor(Math.random()*maxClicks);
+	targetcmyks['Y'] = diff*randomClicks;
+	console.log(randomClicks);
 	console.log(targetcmyks);
 }
 
 
 function drawTarget(){
 	ctx.beginPath();
-	randomTargetCmyk();
+	randomTargetCmyk(diff);
 	ctx.fillStyle = ryb2hex(targetcmyks);
 	ctx.rect(200,50,100,100);
 	ctx.fill();
