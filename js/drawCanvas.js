@@ -12,18 +12,19 @@ c.height = 500;
 
 
 //button coordinates
-var CPlusX = 130;
-var CPlusY = 250;
-var CMinusX = 30;
-var CMinusY = 250;
-var MPlusX = 350;
-var MPlusY = 250;
-var MMinusX = 458;
-var MMinusY = 250;
+var RPlusX = 350;
+var RPlusY = 250;
+var RMinusX = 458;
+var RMinusY = 250;
 var YPlusX = 240;
 var YPlusY = 360;
 var YMinusX = 240;
 var YMinusY = 460;
+var BPlusX = 130;
+var BPlusY = 250;
+var BMinusX = 30;
+var BMinusY = 250;
+
 var OKx = 300;
 var OKy = 300;
 var paintAmount = 0;
@@ -32,29 +33,21 @@ function nearButton(e){
 	var closeness = 40;
 	var posX = e.pageX - $("#myCanvas").offset().left;
     var posY = e.pageY - $("#myCanvas").offset().top;
-	var distCPlus = Math.sqrt(Math.pow((posX-CPlusX),2) + Math.pow((posY-CPlusY),2));
-	var distCMinus = Math.sqrt(Math.pow((posX-CMinusX),2) + Math.pow((posY-CMinusY),2));
-	var distMPlus = Math.sqrt(Math.pow((posX-MPlusX),2) + Math.pow((posY-MPlusY),2));
-	var distMMinus = Math.sqrt(Math.pow((posX-MMinusX),2) + Math.pow((posY-MMinusY),2));
+	var distRPlus = Math.sqrt(Math.pow((posX-RPlusX),2) + Math.pow((posY-RPlusY),2));
+	var distRMinus = Math.sqrt(Math.pow((posX-RMinusX),2) + Math.pow((posY-RMinusY),2));
 	var distYPlus = Math.sqrt(Math.pow((posX-YPlusX),2) + Math.pow((posY-YPlusY),2));
 	var distYMinus = Math.sqrt(Math.pow((posX-YMinusX),2) + Math.pow((posY-YMinusY),2));
+	var distBPlus = Math.sqrt(Math.pow((posX-BPlusX),2) + Math.pow((posY-BPlusY),2));
+	var distBMinus = Math.sqrt(Math.pow((posX-BMinusX),2) + Math.pow((posY-BMinusY),2));
 
 
-	if (distCPlus<closeness){
-		paintAmount += 1;
-		return("C+");
-	}
-	if (distCMinus<closeness){
-		paintAmount -= 1;		
-		return("C-");
-	}
-	if (distMPlus<closeness){
+	if (distRPlus<closeness){
 		paintAmount += 1;		
-		return("M+");
+		return("R+");
 	}
-	if (distMMinus<closeness){
+	if (distRMinus<closeness){
 		paintAmount -= 1;
-		return("M-");
+		return("R-");
 	}
 	if (distYPlus<closeness){
 		paintAmount += 1;
@@ -64,6 +57,15 @@ function nearButton(e){
 		paintAmount -= 1;
 		return("Y-");
 	}
+	if (distBPlus<closeness){
+		paintAmount += 1;
+		return("B+");
+	}
+	if (distBMinus<closeness){
+		paintAmount -= 1;		
+		return("B-");
+	}
+
 	return("");
 }
 
@@ -79,13 +81,13 @@ function nearOkButton(e){
 }
 
 //color handling
-var cmyks = {}
+var rybs = {}
 
-var targetcmyks = {}
-targetcmyks['C'] = 0;
-targetcmyks['M'] = 0;
-targetcmyks['Y'] = 0;
-targetcmyks['K'] = 0;
+var targetrybs = {}
+targetrybs['R'] = 0;
+targetrybs['Y'] = 0;
+targetrybs['B'] = 0;
+targetrybs['K'] = 0;
 
 //code from https://github.com/bahamas10/node-ryb2rgb/blob/master/ryb2rgb.js
 //thanks @alkisg
@@ -129,10 +131,10 @@ function cubicInt(t, A, B){
 
 
 
-function ryb2hex(cmyksDict){
-	r = cmyksDict['M']/100;
-	y = cmyksDict['Y']/100;
-	b = cmyksDict['C']/100;
+function ryb2hex(rybsDict){
+	r = rybsDict['R']/100;
+	y = rybsDict['Y']/100;
+	b = rybsDict['B']/100;
 	rgb_red   = getR(r,y,b);
 	rgb_green = getG(r,y,b);
 	rgb_blue  = getB(r,y,b);
@@ -153,39 +155,20 @@ function ryb2hex(cmyksDict){
   	return(retStr);
 }
 
-/*deprecated
-function cmyktoHex(cmyksDict){
-  var r = 255 * (100 - cmyksDict['C'])/100 * (100 - cmyksDict['K'])/100;
-  var g = 255 * (100 - cmyksDict['M'])/100 * (100 - cmyksDict['K'])/100;
-  var b = 255 * (100 - cmyksDict['Y'])/100 * (100 - cmyksDict['K'])/100;
-
-  var rStr = Math.floor(r).toString(16);
-  var gStr = Math.floor(g).toString(16);
-  var bStr = Math.floor(b).toString(16);
-  if (rStr.length == 1){
-    rStr = "0"+rStr;}
-  if (gStr.length == 1){
-    gStr = "0"+gStr;}
-  if (bStr.length == 1){
-    bStr = "0"+bStr;}
-  var retStr = "#" + rStr + gStr + bStr;
-  return(retStr);
-}*/
-
 function changeColor(changeId){
 	if (changeId!=""){
     if (changeId[1] == '+'){
-    	cmyks[changeId[0]] += diff;
-      	if (cmyks[changeId[0]]>100)
-        	cmyks[changeId[0]] -= diff;
+    	rybs[changeId[0]] += diff;
+      	if (rybs[changeId[0]]>100)
+        	rybs[changeId[0]] -= diff;
     }
     else{
-    	cmyks[changeId[0]] -= diff;
-      	if (cmyks[changeId[0]]<0)
-      		cmyks[changeId[0]] += diff;
+    	rybs[changeId[0]] -= diff;
+      	if (rybs[changeId[0]]<0)
+      		rybs[changeId[0]] += diff;
     }
   }
-  console.log(cmyks);
+  console.log(rybs);
 }
 
 
@@ -194,34 +177,34 @@ function randomTargetCmyk(diff){
 	*/
 	maxClicks = Math.floor(100.0/diff);
 	randomClicks = Math.floor(Math.random()*maxClicks);
-	targetcmyks['C'] = diff*randomClicks;
+	targetrybs['B'] = diff*randomClicks;
 	console.log(randomClicks);
 	randomClicks = Math.floor(Math.random()*maxClicks);
-	targetcmyks['M'] = diff*randomClicks;
+	targetrybs['R'] = diff*randomClicks;
 	console.log(randomClicks);
 	randomClicks = Math.floor(Math.random()*maxClicks);
-	targetcmyks['Y'] = diff*randomClicks;
+	targetrybs['Y'] = diff*randomClicks;
 	console.log(randomClicks);
-	console.log(targetcmyks);
+	console.log(targetrybs);
 }
 
 
 function drawTarget(){
 	ctx.beginPath();
 	randomTargetCmyk(diff);
-	ctx.fillStyle = ryb2hex(targetcmyks);
+	ctx.fillStyle = ryb2hex(targetrybs);
 	ctx.rect(200,50,100,100);
 	ctx.fill();
 	ctx.closePath();
 }
 
 function drawCircle(){
-	cmyks['C'] = 0;
-	cmyks['M'] = 0;
-	cmyks['Y'] = 0;
-	cmyks['K'] = 0;
+	rybs['R'] = 0;
+	rybs['Y'] = 0;
+	rybs['B'] = 0;
+	rybs['K'] = 0;
 	ctx.beginPath();
-	ctx.fillStyle = ryb2hex(cmyks);
+	ctx.fillStyle = ryb2hex(rybs);
 	ctx.arc(250,240,70,0,2*Math.PI);
 	ctx.stroke();
 	ctx.fill();
@@ -238,10 +221,10 @@ img.onload = function () {
 	ctx.beginPath();
 	ctx.fillStyle = 'black';
 	ctx.font = "30px Arial";
-	ctx.fillText("+",CPlusX,CPlusY);
-	ctx.fillText("-",CMinusX,CMinusY); 
-	ctx.fillText("+",MPlusX,MPlusY);
-	ctx.fillText("-",MMinusX,MMinusY);	
+	ctx.fillText("+",BPlusX,BPlusY);
+	ctx.fillText("-",BMinusX,BMinusY); 
+	ctx.fillText("+",RPlusX,RPlusY);
+	ctx.fillText("-",RMinusX,RMinusY);	
 	ctx.fillText("+",YPlusX,YPlusY);
 	ctx.fillText("-",YMinusX,YMinusY);
 	ctx.closePath();
@@ -249,7 +232,7 @@ img.onload = function () {
 	ctx.drawImage(okimg,OKx,OKy);
 
 }
-img.src = "imgs/watermelon2.png";
+img.src = "imgs/bkg.png";
 //https://openclipart.org/detail/212394/ok
 okimg.src = "imgs/okIcon.png"
 
@@ -257,9 +240,9 @@ okimg.src = "imgs/okIcon.png"
 $('#myCanvas').click(function(e){
 	ctx.beginPath();
 	changeColor(nearButton(e));
-	ctx.fillStyle = ryb2hex(cmyks);
+	ctx.fillStyle = ryb2hex(rybs);
 	if (nearOkButton(e)){
-		if (ryb2hex(targetcmyks) == ryb2hex(cmyks)){
+		if (ryb2hex(targetrybs) == ryb2hex(rybs)){
 			drawTarget();
 			drawCircle();
 		}
