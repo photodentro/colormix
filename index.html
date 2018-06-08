@@ -1,14 +1,435 @@
- <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Ανάμιξη χρωμάτων</title>
-<script src='./js/jquery-3.3.1.min.js'></script>
-<script src='./js/colorMix.js'></script>
+<!doctype html> 
+<!-- Copyright (C) 2018 Alkis Georgopoulos <alkisg@gmail.com>. License: GPLv3. -->
+<html lang="el"> 
+<head> 
+  <meta charset="UTF-8" />
+  <!-- Using this metatag users can't scale the page using pinchIn/out gestures on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Ανάμιξη χρωμάτων</title> 
+  <!--REMEMEBER TO RESTORE
+  <script src="https://code.createjs.com/1.0.0/easeljs.min.js"></script>-->
+  <script src="createjs-2015.11.26.min.js"></script>  
+  <style type="text/css">
+    /* Remove margins and HTML scrollbars */
+    body, html  {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: black;
+    }
+    #mainCanvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    }
+  </style>
 </head>
-<body>
-<canvas id="myCanvas" style = "border-style:solid;"></canvas>
-</div>
-<script src='./js/drawCanvas.js'></script>
+<body onload = "init();">
+  <canvas id="mainCanvas" width="320" height="180">
+    Your browser doesn't support HTML5!
+  </canvas>
+<script>
+  var stage;
+  var resourceNames = ["background.svg","bar_help.svg","bar_home.svg", "bar_previous.svg", "bar_next.svg",
+                       "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg"];
+  var resourcesLoaded = 0;
+  var resources = [];
+  var ratio = 16/9;
+  var winratio;
+  var boxl;
+  var boxr;
+  var menubar = [];
+  var lvlText = "1";
+  var level = 0; 
+  var bg;
+  var buttonOk;
+  var tubes = [];
+  var pluses = [];
+  var minuses = [];
+  var radius;
+  var explainText;
+  var lvlColorStep;
+  var lvlColorNum;
+  var targetrybs = {};
+  var workingrybs = {'R':0,'Y':0,'B':0};
+  var workingCircle = new createjs.Shape();
+  var targetCircle = new createjs.Shape();
+  var ci;
+
+  function init(){
+    console.clear();
+    stage = new createjs.Stage("mainCanvas");
+    stage.enableMouseOver();
+    
+    // Resource preloading
+    for (var i = 0; i < resourceNames.length; i++) {
+
+      resources[i] = new Image();
+      resources[i].src = "resource/" + resourceNames[i];
+      resources[i].onload = queueFileLoad;
+
+    }
+    // The last queueFileLoad calls queueComplete. Execution continues there.
+
+  }
+
+function imgByName(name) {
+  return resources[resourceNames.indexOf(name)];
+}
+
+function queueFileLoad(event) {
+  resourcesLoaded++;
+  stage.update();
+  if (resourcesLoaded == resourceNames.length)
+    queueComplete(event);
+}
+
+function queueComplete(event) {
+  console.log("Finished loading resources");
+  bg = new createjs.Bitmap(imgByName("background.svg"));
+  stage.addChild(bg);
+  
+  buttonOk = new createjs.Bitmap(imgByName("button_checked.png"));
+  buttonOk.addEventListener('click',function(event){
+    if (ryb2hex(workingrybs) == ryb2hex(targetrybs)){
+      onMenuNext();
+    }
+  });
+  stage.addChild(buttonOk);
+  var onMenuClick = [onMenuHelp, onMenuHome, onMenuPrevious, onMenuNext];
+  for (i = 0; i < 4; i++) {
+
+    menubar[i] = new createjs.Bitmap(resources[resourceNames.indexOf('bar_help.svg')+i]);
+    menubar[i].addEventListener("click", onMenuClick[i]);
+    menubar[i].addEventListener("mouseover", function(event) {
+        // Bring the target on top in its container, mostly for the rotation animation
+        event.target.parent.setChildIndex(event.target, event.target.parent.numChildren - 1);
+        event.target.scaleX = 1.2*event.target.savedscaleX;
+        event.target.scaleY = 1.2*event.target.savedscaleY;
+        stage.update();});
+    menubar[i].addEventListener("mouseout", function(event) {
+        event.target.scaleX = event.target.savedscaleX;
+        event.target.scaleY = event.target.savedscaleY;
+        stage.update();});
+    stage.addChild(menubar[i]);
+    
+  }
+  lvlText = new createjs.Text("1", "20px Arial", "black");
+  lvlText.textAlign = "center";
+  lvlText.textBaseline = "middle";
+  stage.addChild(lvlText);
+
+
+  explainText = new createjs.Text("Ταίριαξε τα χρώματα","20px Arial","black");
+  explainText.textAlign = "center";
+  explainText.textBaseline = "middle";
+  stage.addChild(explainText);
+  for (var i=0; i<3; i++){
+    tubes[i] = new createjs.Bitmap(resources[resourceNames.indexOf('tubeb.png')+i]);
+    stage.addChild(tubes[i]);
+  }
+
+  ci = ['B','Y','R'];
+  for (var i=0; i<3; i++){
+    pluses[i] = new createjs.Bitmap(resources[resourceNames.indexOf('plus.svg')]);
+    minuses[i] = new createjs.Bitmap(resources[resourceNames.indexOf('minus.svg')]);
+  }
+  pluses[0].addEventListener('click',function(){
+    addWorkingColor('B');
+  });
+  pluses[1].addEventListener('click',function(){
+    addWorkingColor('Y');
+  });
+  pluses[2].addEventListener('click',function(){
+    addWorkingColor('R');
+  });
+  minuses[0].addEventListener('click',function(){
+    subWorkingColor('B');
+  });
+  minuses[1].addEventListener('click',function(){
+    subWorkingColor('Y');
+  });
+  minuses[2].addEventListener('click',function(){
+    subWorkingColor('R');
+  });
+
+  for (var i=0; i<3; i++){
+    stage.addChild(pluses[i]);
+    stage.addChild(minuses[i]);
+  }
+
+  stage.update();
+  initLevel(0);
+  resize();
+  window.addEventListener('resize', resize, false);
+}
+
+function getRandomColor(cn,cs){
+  //colornum and colorstep
+  var t = {};
+  maxClicks = Math.floor(100.0/cs);
+  var allColors = ['R','Y','B'];
+  t['R'] = 0;
+  t['Y'] = 0;
+  t['B'] = 0;
+  for (var i=0; i<cn; i++){
+    c = Math.floor(Math.random()*allColors.length);
+    if (maxClicks !=1){
+      t[allColors[c]] = Math.floor(Math.random()*maxClicks)*cs;
+    }
+    else{//only for first level
+      t[allColors[c]] = 100;
+    }
+    allColors.slice(c,1);
+  }
+  return(t);
+}
+
+function ryb2hex(rybsDict){
+
+  r = rybsDict['R']/100;
+  y = rybsDict['Y']/100;
+  b = rybsDict['B']/100;
+  rgb_red   = getR(r,y,b);
+  rgb_green = getG(r,y,b);
+  rgb_blue  = getB(r,y,b);
+  
+  var rStr = Math.floor(rgb_red).toString(16);
+    var gStr = Math.floor(rgb_green).toString(16);
+    var bStr = Math.floor(rgb_blue).toString(16);
+    if (rStr.length == 1){
+      rStr = "0"+rStr;
+    }
+    if (gStr.length == 1){
+      gStr = "0"+gStr;
+    }
+    if (bStr.length == 1){
+      bStr = "0"+bStr;
+    }
+    var retStr = "#" + rStr + gStr + bStr;
+    return(retStr);
+}
+  function cubicInt(t, A, B){
+      var weight = t*t*(3-2*t);
+      return A + weight*(B-A);
+  }
+
+  function getR(iR, iY, iB) {
+    // red
+    var x0 = cubicInt(iB, 1.0, 0.163);
+    var x1 = cubicInt(iB, 1.0, 0.0);
+    var x2 = cubicInt(iB, 1.0, 0.5);
+    var x3 = cubicInt(iB, 1.0, 0.2);
+    var y0 = cubicInt(iY, x0, x1);
+    var y1 = cubicInt(iY, x2, x3);
+    return Math.ceil (255 * cubicInt(iR, y0, y1));
+  }
+
+  function getG(iR, iY, iB) {
+    // green
+    var x0 = cubicInt(iB, 1.0, 0.373);
+    var x1 = cubicInt(iB, 1.0, 0.66);
+    var x2 = cubicInt(iB, 0.0, 0.0);
+    var x3 = cubicInt(iB, 0.5, 0.094);
+    var y0 = cubicInt(iY, x0, x1);
+    var y1 = cubicInt(iY, x2, x3);
+    return Math.ceil (255 * cubicInt(iR, y0, y1));
+  }
+
+  function getB(iR, iY, iB) {
+    // blue
+    var x0 = cubicInt(iB, 1.0, 0.6);
+    var x1 = cubicInt(iB, 0.0, 0.2);
+    var x2 = cubicInt(iB, 0.0, 0.5);
+    var x3 = cubicInt(iB, 0.0, 0.0);
+    var y0 = cubicInt(iY, x0, x1);
+    var y1 = cubicInt(iY, x2, x3);
+    return Math.ceil (255 * cubicInt(iR, y0, y1));
+  }
+
+function addWorkingColor(c){
+  if (workingrybs[c] + lvlColorStep <= 100){
+    workingrybs[c] += lvlColorStep;
+  }
+  workingCircle.graphics.beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/3,radius);
+  stage.update();
+
+}
+
+function subWorkingColor(c){
+  if (workingrybs[c] - lvlColorStep >= 0){
+    workingrybs[c] -= lvlColorStep;
+  }
+  workingCircle.graphics.beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/3,radius);
+  stage.update();
+}
+
+
+function initLevel(newLevel) {
+  //Level config
+  var colorStep = [100,100,100,50,50,25,25];
+  var colorNum  = [  1,  2,  3, 2, 3, 2, 3];
+  lvlColorNum = colorNum[newLevel];
+  lvlColorStep = colorStep[newLevel];
+  targetrybs = getRandomColor(lvlColorNum,lvlColorStep);
+  workingrybs = {'R':0,'Y':0,'B':0};
+  level = newLevel;
+  lvlText.text = level;
+  resize();
+
+
+}
+
+function resize() {
+  // Resize the canvas element
+  winratio = window.innerWidth/window.innerHeight;
+  if (winratio >= ratio) {
+    stage.canvas.height = window.innerHeight;
+    stage.canvas.width = stage.canvas.height * ratio;
+  } else {
+    stage.canvas.width = window.innerWidth;
+    stage.canvas.height = stage.canvas.width / ratio;
+  }
+  var bbs = stage.canvas.height / 10;  // bar button size
+
+  var bbm = bbs / 5;  // bar button margin
+  // TODO: local/global variables, eslint...
+  for (i = 0; i < 4; i++) {
+    // Leave one space for the level
+    if (i < 3)
+      j = i;
+    else
+      j = i + 1;
+    menubar[i].scaleX = bbs / menubar[i].image.width;
+    menubar[i].scaleY = bbs / menubar[i].image.height;
+    menubar[i].regX = menubar[i].image.width / 2;
+    menubar[i].regY = menubar[i].image.height / 2;
+    menubar[i].x = (j + 1)*bbm + bbs/2 + j*bbs;
+    menubar[i].y = stage.canvas.height - bbm - bbs/2;
+    menubar[i].visible = true;
+    // These copies are used to preserve the original scale on mouseover
+    menubar[i].savedscaleX = menubar[i].scaleX;
+    menubar[i].savedscaleY = menubar[i].scaleY;
+  }
+
+  lvlText.text = level + 1;
+  lvlText.x = (3 + 1)*bbm + bbs/2 + 3*bbs;
+  lvlText.y = stage.canvas.height - bbm/2 - bbs/2;
+  lvlText.font = parseInt(2*bbs/2) + "px Arial";
+
+  explainText.x = stage.canvas.width / 4;
+  explainText.y = stage.canvas.height / 6;
+  explainText.font = parseInt(bbs/2) + "px Arial";
+
+  radius = (stage.canvas.height / 2 - bbs) / 4;
+  for (var i=0; i<3; i++){
+    tubes[i].scaleY = ((stage.canvas.height * 2/3) - bbs - 2*radius) / tubes[i].image.width;
+    tubes[i].scaleX = tubes[i].scaleY;
+    tubes[i].regX = tubes[i].image.width/2;
+    tubes[i].regY = tubes[i].image.height/2;
+  }
+
+
+  //red
+  tubes[2].x = stage.canvas.width / 2 - radius - tubes[2].image.width*tubes[2].scaleX/2;
+  tubes[2].y = stage.canvas.height / 3;
+  //yellow
+  tubes[1].x = stage.canvas.width / 2;
+  tubes[1].y = stage.canvas.height / 3 + stage.canvas.height /4;
+  tubes[1].rotation = 270;
+  tubes[0].x = stage.canvas.width / 2 + radius + tubes[0].image.width*tubes[0].scaleX/2;
+  tubes[0].y = stage.canvas.height /3;
+  tubes[0].rotation = 180;
+  for (var i=0; i<3; i++){
+    stage.addChild(tubes[i]);
+  }
+
+  
+  targetCircle.graphics.clear();
+  targetCircle.graphics.beginFill(ryb2hex(targetrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/8,radius);
+  stage.addChild(targetCircle);
+
+  
+  workingCircle.graphics.clear();
+  workingCircle.graphics.beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/3,radius);
+  stage.addChild(workingCircle);
+
+
+
+  for (var i=0; i<3; i++){
+    pluses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width/2)/pluses[i].image.width;
+    pluses[i].scaleY = pluses[i].scaleX;
+    minuses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width/2)/minuses[i].image.width;
+    minuses[i].scaleY = minuses[i].scaleX;
+    pluses[i].regX = pluses[i].image.width/2;
+    pluses[i].regY = pluses[i].image.height/2;
+    minuses[i].regX = minuses[i].image.width/2;
+    minuses[i].regY = minuses[i].image.height/2;
+  }
+
+  //red
+  var tubeWidth = tubes[2].image.width*tubes[2].scaleX;
+  pluses[2].x = tubes[2].x + tubeWidth / 2 - tubeWidth / 3;
+  minuses[2].x = tubes[2].x - tubeWidth / 2 + tubeWidth / 4;
+  pluses[2].y = stage.canvas.height / 3;
+  minuses[2].y = stage.canvas.height / 3;
+  stage.setChildIndex(pluses[2],stage.numChildren-1);
+  stage.setChildIndex(minuses[2],stage.numChildren-1);
+  
+  //yellow
+  pluses[1].x = stage.canvas.width/2;
+  pluses[1].y = tubes[1].y - tubeWidth / 5;
+  minuses[1].x = stage.canvas.width/2;
+  minuses[1].y = tubes[1].y + tubeWidth / 3;
+  stage.setChildIndex(pluses[1],stage.numChildren-1);
+  stage.setChildIndex(minuses[1],stage.numChildren-1);  
+  //blue
+  pluses[0].x = tubes[0].x - tubeWidth / 6;
+  pluses[0].y = stage.canvas.height /3;
+  minuses[0].x = tubes[0].x + tubeWidth / 4;
+  minuses[0].y = stage.canvas.height /3;
+  stage.setChildIndex(pluses[0],stage.numChildren-1);
+  stage.setChildIndex(minuses[0],stage.numChildren-1);
+
+  buttonOk.scaleX = 2*menubar[0].scaleX;
+  buttonOk.scaleY = 2*menubar[0].scaleY;
+  var hit = new createjs.Shape();
+  hit.graphics.beginFill("000").drawRect(0,0,buttonOk.scaleX*buttonOk.image.width,buttonOk.scaleY*buttonOk.image.height);
+  buttonOk.hitArea = hit;
+  buttonOk.regX = buttonOk.image.width/2;
+  buttonOk.regY = buttonOk.image.height/2;
+  buttonOk.x = stage.canvas.width * 3/4;
+  buttonOk.y = stage.canvas.height * 3/4;
+
+
+  // Fill all the canvas with the background
+  bg.scaleX = stage.canvas.width / bg.image.width;
+  bg.scaleY = stage.canvas.height / bg.image.height;
+  stage.update();
+}
+
+
+function onMenuHelp(event) {
+  alert("Επιλέξτε εικόνες από το κάτω κουτί και βάλτε τις στο δεξί κουτί έτσι ώστε να ταιριάζουν με το αριστερό κουτί.");
+}
+
+function onMenuHome(event) {
+  window.history.back();
+}
+
+function onMenuPrevious(event) {
+  initLevel((level+4) % 5);
+}
+
+function onMenuNext(event) {
+  initLevel((level+1) % 5);
+}
+
+</script>
 </body>
-</html> 
+</html>
