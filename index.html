@@ -33,6 +33,8 @@
   </canvas>
 <script>
   var stage;
+  var feedbackText;
+  var statusText = "";
   var resourceNames = ["background.svg","bar_help.svg","bar_home.svg", "bar_previous.svg", "bar_next.svg",
                        "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg"];
   var resourcesLoaded = 0;
@@ -63,7 +65,18 @@
     console.clear();
     stage = new createjs.Stage("mainCanvas");
     stage.enableMouseOver();
+    statusText = new createjs.Text("Φόρτωση...", "20px Arial", "white");
+    statusText.textAlign = "center";
+    statusText.textBaseline = "middle";
+    stage.addChild(statusText);
     
+    feedbackText = new createjs.Text("Τα χρώματα ταιριάζουν", "20px Arial", "black");
+    feedbackText.textAlign = "center";
+    feedbackText.textBaseline = "middle";
+    feedbackText.visible = false;
+    stage.addChild(feedbackText);
+    stage.update();
+    resize();
     // Resource preloading
     for (var i = 0; i < resourceNames.length; i++) {
 
@@ -82,6 +95,7 @@ function imgByName(name) {
 
 function queueFileLoad(event) {
   resourcesLoaded++;
+  statusText.text = "Φόρτωση... " + parseInt(100*resourcesLoaded/resourceNames.length) + " %";
   stage.update();
   if (resourcesLoaded == resourceNames.length)
     queueComplete(event);
@@ -94,10 +108,29 @@ function queueComplete(event) {
   
   buttonOk = new createjs.Bitmap(imgByName("button_checked.png"));
   buttonOk.addEventListener('click',function(event){
-    if (ryb2hex(workingrybs) == ryb2hex(targetrybs)){
-      onMenuNext();
+    if (ryb2hex(workingrybs) == ryb2hex(targetrybs)){      
+      feedbackText.visible = true;
+      stage.addChild(feedbackText);
+      console.log(feedbackText.x,feedbackText.y);
+      stage.update();
+      setTimeout(onMenuNext,2000);
+      setTimeout(function(){
+        feedbackText.visible = false;
+        stage.update();
+      },2000);
     }
   });
+  buttonOk.addEventListener("mouseover", function(event) {
+        // Bring the target on top in its container, mostly for the rotation animation
+        event.target.parent.setChildIndex(event.target, event.target.parent.numChildren - 1);
+        event.target.scaleX = 1.2*event.target.savedscaleX;
+        event.target.scaleY = 1.2*event.target.savedscaleY;
+        stage.update();});
+  buttonOk.addEventListener("mouseout", function(event) {
+        event.target.scaleX = event.target.savedscaleX;
+        event.target.scaleY = event.target.savedscaleY;
+        stage.update();});
+
   stage.addChild(buttonOk);
   var onMenuClick = [onMenuHelp, onMenuHome, onMenuPrevious, onMenuNext];
   for (i = 0; i < 4; i++) {
@@ -189,10 +222,17 @@ function getRandomColor(cn,cs){
 }
 
 function ryb2hex(rybsDict){
+  //the black controversy
+  if (rybsDict['R']==maxClicks * lvlColorStep 
+      && rybsDict['Y']==maxClicks * lvlColorStep 
+      && rybsDict['B']==maxClicks * lvlColorStep){
+    return('#000000');
+  }
 
   r = rybsDict['R']/100;
   y = rybsDict['Y']/100;
   b = rybsDict['B']/100;
+  console.log(r,y,b);
   rgb_red   = getR(r,y,b);
   rgb_green = getG(r,y,b);
   rgb_blue  = getB(r,y,b);
@@ -270,8 +310,8 @@ function subWorkingColor(c){
 
 function initLevel(newLevel) {
   //Level config
-  var colorStep = [100,100,100,50,50,25,25];
-  var colorNum  = [  1,  2,  3, 2, 3, 2, 3];
+  var colorStep = [100,100,100,50,50,25,25,12.5, 12.5];
+  var colorNum  = [  1,  2,  3, 2, 3, 2, 3,   2,    3];
   lvlColorNum = colorNum[newLevel];
   lvlColorStep = colorStep[newLevel];
   targetrybs = getRandomColor(lvlColorNum,lvlColorStep);
@@ -293,6 +333,19 @@ function resize() {
     stage.canvas.width = window.innerWidth;
     stage.canvas.height = stage.canvas.width / ratio;
   }
+  if (!menubar[0]) {
+    statusText.x = stage.canvas.width / 2;
+    statusText.y = stage.canvas.height / 2;
+    statusText.font = parseInt(stage.canvas.height/10) + "px Arial";
+    stage.setChildIndex(statusText,stage.numChildren - 1);
+    statusText.visible = true;
+    stage.update();
+    return;
+  }
+  else{
+    statusText.visible = false;
+  }
+
   var bbs = stage.canvas.height / 10;  // bar button size
 
   var bbm = bbs / 5;  // bar button margin
@@ -320,6 +373,7 @@ function resize() {
   lvlText.y = stage.canvas.height - bbm/2 - bbs/2;
   lvlText.font = parseInt(2*bbs/2) + "px Arial";
 
+
   explainText.x = stage.canvas.width / 4;
   explainText.y = stage.canvas.height / 6;
   explainText.font = parseInt(bbs/2) + "px Arial";
@@ -338,7 +392,7 @@ function resize() {
   tubes[2].y = stage.canvas.height / 3;
   //yellow
   tubes[1].x = stage.canvas.width / 2;
-  tubes[1].y = stage.canvas.height / 3 + stage.canvas.height /4;
+  tubes[1].y = stage.canvas.height / 3 + stage.canvas.height /4 + stage.canvas.height/35;
   tubes[1].rotation = 270;
   tubes[0].x = stage.canvas.width / 2 + radius + tubes[0].image.width*tubes[0].scaleX/2;
   tubes[0].y = stage.canvas.height /3;
@@ -403,6 +457,12 @@ function resize() {
   buttonOk.regY = buttonOk.image.height/2;
   buttonOk.x = stage.canvas.width * 3/4;
   buttonOk.y = stage.canvas.height * 3/4;
+  buttonOk.savedscaleX = buttonOk.scaleX;
+  buttonOk.savedscaleY = buttonOk.scaleY;
+
+  feedbackText.font = parseInt(bbs/2) + "px Arial";
+  feedbackText.x = buttonOk.x;
+  feedbackText.y = buttonOk.y - 2*buttonOk.image.height*buttonOk.savedscaleY;
 
 
   // Fill all the canvas with the background
@@ -413,7 +473,7 @@ function resize() {
 
 
 function onMenuHelp(event) {
-  alert("Επιλέξτε εικόνες από το κάτω κουτί και βάλτε τις στο δεξί κουτί έτσι ώστε να ταιριάζουν με το αριστερό κουτί.");
+  alert("Χρησιμοποιήστε τα + και τα - και ταιριάξτε τα χρώματα.");
 }
 
 function onMenuHome(event) {
@@ -421,11 +481,11 @@ function onMenuHome(event) {
 }
 
 function onMenuPrevious(event) {
-  initLevel((level+4) % 5);
+  initLevel((level+7) % 9);
 }
 
 function onMenuNext(event) {
-  initLevel((level+1) % 5);
+  initLevel((level+1) % 9);
 }
 
 </script>
