@@ -35,7 +35,7 @@
   var stage;
   var feedbackText;
   var statusText = "";
-  var resourceNames = ["background.svg","bar_help.svg","bar_home.svg", "bar_previous.svg", "bar_next.svg",
+  var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg",
                        "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg"];
   var resourcesLoaded = 0;
   var resources = [];
@@ -132,10 +132,10 @@ function queueComplete(event) {
         stage.update();});
 
   stage.addChild(buttonOk);
-  var onMenuClick = [onMenuHelp, onMenuHome, onMenuPrevious, onMenuNext];
-  for (i = 0; i < 4; i++) {
+  var onMenuClick = [onMenuHome, onMenuHelp, onMenuAbout, onMenuPrevious, onMenuNext];
+  for (i = 0; i < 5; i++) {
 
-    menubar[i] = new createjs.Bitmap(resources[resourceNames.indexOf('bar_help.svg')+i]);
+    menubar[i] = new createjs.Bitmap(resources[resourceNames.indexOf('bar_home.svg')+i]);
     menubar[i].addEventListener("click", onMenuClick[i]);
     menubar[i].addEventListener("mouseover", function(event) {
         // Bring the target on top in its container, mostly for the rotation animation
@@ -311,7 +311,7 @@ function subWorkingColor(c){
 function initLevel(newLevel) {
   //Level config
   var colorStep = [100,100,100,100,100,50,50,25,25];
-  var colorNum  = [  1,  2,  3,  3,  3,2, 3, 2, 3];
+  var colorNum  = [  1,  2,  3,  3,  3, 2, 3, 2, 3];
   lvlColorNum = colorNum[newLevel];
   lvlColorStep = colorStep[newLevel];
   targetrybs = getRandomColor(lvlColorNum,lvlColorStep);
@@ -350,9 +350,9 @@ function resize() {
 
   var bbm = bbs / 5;  // bar button margin
   // TODO: local/global variables, eslint...
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 5; i++) {
     // Leave one space for the level
-    if (i < 3)
+    if (i < 4)
       j = i;
     else
       j = i + 1;
@@ -369,7 +369,7 @@ function resize() {
   }
 
   lvlText.text = level + 1;
-  lvlText.x = (3 + 1)*bbm + bbs/2 + 3*bbs;
+  lvlText.x = (4 + 1)*bbm + bbs/2 + 4*bbs;
   lvlText.y = stage.canvas.height - bbm/2 - bbs/2;
   lvlText.font = parseInt(2*bbs/2) + "px Arial";
 
@@ -470,7 +470,9 @@ function resize() {
   bg.scaleY = stage.canvas.height / bg.image.height;
   stage.update();
 }
-
+function onMenuAbout(event) {
+  window.open("credits/index_DS_II.html");
+}
 
 function onMenuHelp(event) {
   alert("Χρησιμοποιήστε τα + και τα - και ταιριάξτε τα χρώματα.");
