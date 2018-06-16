@@ -33,10 +33,9 @@
   </canvas>
 <script>
   var stage;
-  var feedbackText;
   var statusText = "";
   var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg",
-                       "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg"];
+                       "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg","popup.svg"];
   var resourcesLoaded = 0;
   var resources = [];
   var ratio = 16/9;
@@ -60,21 +59,73 @@
   var workingCircle = new createjs.Shape();
   var targetCircle = new createjs.Shape();
   var ci;
+  var popupCont;
+  var popupBkg;
+  var popupTxt;
+  var pu;
+
+  function popup(){
+    this.setTxt = popupSetTxt;
+    this.show = popupShow;
+    this.hide = popupHide;
+    this.resize = popupResize;
+    //this.resize = popupResize;
+  }
+  function popupHide(){
+    popupBkg.visible = false;
+    popupTxt.visible = false;
+    stage.update();
+  }
+  function popupSetTxt(txt){
+    this.txt = txt;
+  }
+
+  function popupResize(){
+    popupTxt.font = parseInt(stage.canvas.height/30) + "px Arial";
+    popupTxt.x = 34/1280*stage.canvas.width;
+    popupTxt.y = 86/720*stage.canvas.height;
+    popupCont.x = 280/1280*stage.canvas.width;
+    popupCont.y = 210/720*stage.canvas.height;
+    popupBkg.scaleX = stage.canvas.width/1280;
+    popupBkg.scaleY = stage.canvas.height/720;
+    var h = new createjs.Shape();
+    h.graphics.beginFill('#000').drawRect(650/720*popupBkg.image.width,0,60/720*popupBkg.image.width,50/260*popupBkg.image.height);
+    popupBkg.hitArea = h;
+    popupCont.width = popupBkg.width;
+    popupCont.height = popupBkg.height;   
+    stage.setChildIndex(popupCont,stage.numChildren-1);
+  }
+
+  function popupShow(){
+    this.resize();
+    popupTxt.text = this.txt;
+    popupBkg.addEventListener('click',function(e){
+      pu.hide();
+      });
+    popupBkg.visible = true;
+    popupTxt.visible = true;
+    popupCont.addChild(popupBkg);
+    popupCont.addChild(popupTxt);
+    stage.addChild(popupCont);
+    stage.setChildIndex(popupCont,stage.numChildren-1);
+    stage.update();
+  }
+
+
 
   function init(){
     console.clear();
     stage = new createjs.Stage("mainCanvas");
     stage.enableMouseOver();
+
+    popupCont = new createjs.Container();
+    stage.addChild(popupCont);
+
     statusText = new createjs.Text("Φόρτωση...", "20px Arial", "white");
     statusText.textAlign = "center";
     statusText.textBaseline = "middle";
     stage.addChild(statusText);
     
-    feedbackText = new createjs.Text("Τα χρώματα ταιριάζουν", "20px Arial", "black");
-    feedbackText.textAlign = "center";
-    feedbackText.textBaseline = "middle";
-    feedbackText.visible = false;
-    stage.addChild(feedbackText);
     stage.update();
     resize();
     // Resource preloading
@@ -108,17 +159,32 @@ function queueComplete(event) {
   
   buttonOk = new createjs.Bitmap(imgByName("button_checked.png"));
   buttonOk.addEventListener('click',function(event){
-    if (ryb2hex(workingrybs) == ryb2hex(targetrybs)){      
-      feedbackText.visible = true;
-      stage.addChild(feedbackText);
-      console.log(feedbackText.x,feedbackText.y);
-      stage.update();
-      setTimeout(onMenuNext,2000);
-      setTimeout(function(){
-        feedbackText.visible = false;
-        stage.update();
-      },2000);
+    var msg = "Χρειάζεται:\n";
+    var cnames = {'R':'κόκκινο','Y':'κίτρινο','B':'μπλε'};
+    for (i = 0; i<Object.keys(cnames).length; i++){
+      var item = Object.keys(cnames)[i];
+      if (workingrybs[item]<targetrybs[item]){
+        msg += "Περισσότερο " + cnames[item];
+      }
+      else{
+        if (workingrybs[item]>targetrybs[item]){
+          msg += "Λιγότερο " + cnames[item]
+        }
+      }
+      msg+="\n";
     }
+
+
+    if (ryb2hex(workingrybs) != ryb2hex(targetrybs)){
+      pu = new popup();
+      pu.setTxt(msg);
+      pu.show();      
+    }
+    else{
+      setTimeout(onMenuNext,1000);
+    }
+
+
   });
   buttonOk.addEventListener("mouseover", function(event) {
         // Bring the target on top in its container, mostly for the rotation animation
@@ -167,8 +233,8 @@ function queueComplete(event) {
 
   ci = ['B','Y','R'];
   for (var i=0; i<3; i++){
-    pluses[i] = new createjs.Bitmap(resources[resourceNames.indexOf('plus.svg')]);
-    minuses[i] = new createjs.Bitmap(resources[resourceNames.indexOf('minus.svg')]);
+    pluses[i] = new createjs.Bitmap(imgByName('plus.svg'));
+    minuses[i] = new createjs.Bitmap(imgByName('minus.svg'));
   }
   pluses[0].addEventListener('click',function(){
     addWorkingColor('B');
@@ -193,6 +259,9 @@ function queueComplete(event) {
     stage.addChild(pluses[i]);
     stage.addChild(minuses[i]);
   }
+  popupBkg = new createjs.Bitmap(imgByName('popup.svg'));
+  popupTxt = new createjs.Text(this.txt,'20px Arial', 'white');
+  popupCont.addChild(popupBkg);
 
   stage.update();
   initLevel(0);
@@ -460,11 +529,12 @@ function resize() {
   buttonOk.savedscaleX = buttonOk.scaleX;
   buttonOk.savedscaleY = buttonOk.scaleY;
 
-  feedbackText.font = parseInt(bbs/2) + "px Arial";
-  feedbackText.x = buttonOk.x;
-  feedbackText.y = buttonOk.y - 2*buttonOk.image.height*buttonOk.savedscaleY;
+  
 
-
+  //If there is popup resize it
+  if (pu){
+  pu.resize();
+  }
   // Fill all the canvas with the background
   bg.scaleX = stage.canvas.width / bg.image.width;
   bg.scaleY = stage.canvas.height / bg.image.height;
