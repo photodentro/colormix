@@ -416,7 +416,6 @@ function resize() {
   }
 
   var bbs = stage.canvas.height / 10;  // bar button size
-
   var bbm = bbs / 5;  // bar button margin
   // TODO: local/global variables, eslint...
   for (i = 0; i < 5; i++) {
@@ -431,7 +430,6 @@ function resize() {
     menubar[i].regY = menubar[i].image.height / 2;
     menubar[i].x = (j + 1)*bbm + bbs/2 + j*bbs;
     menubar[i].y = stage.canvas.height - bbm - bbs/2;
-    menubar[i].visible = true;
     // These copies are used to preserve the original scale on mouseover
     menubar[i].savedscaleX = menubar[i].scaleX;
     menubar[i].savedscaleY = menubar[i].scaleY;
@@ -441,6 +439,12 @@ function resize() {
   lvlText.x = (4 + 1)*bbm + bbs/2 + 4*bbs;
   lvlText.y = stage.canvas.height - bbm/2 - bbs/2;
   lvlText.font = parseInt(2*bbs/2) + "px Arial";
+
+  // If level is single digit, move lvlText and bar_previous a bit left
+  if (level + 1 < 10) {
+    lvlText.x -= bbs/4;
+    menubar[4].x -= bbs/2;
+  }
 
 
   explainText.x = stage.canvas.width / 4;
