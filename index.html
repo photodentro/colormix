@@ -34,7 +34,7 @@
 <script>
   var stage;
   var statusText = "";
-  var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg",
+  var resourceNames = ["background.jpg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg",
                        "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg","popup.svg"];
   var resourcesLoaded = 0;
   var resources = [];
@@ -52,6 +52,9 @@
   var minuses = [];
   var radius;
   var explainText;
+  //Level config
+  var colorStep = [100,100,100,100,100,50,50,25,25, 12.5, 12.5, 12.5  ];
+  var colorNum  = [  1,  2,  3,  3,  3, 2, 3, 2, 3, 2   ,    3,    3  ];  
   var lvlColorStep;
   var lvlColorNum;
   var targetrybs = {};
@@ -63,6 +66,7 @@
   var popupBkg;
   var popupTxt;
   var pu;
+  var targetColors = [];
 
   function popup(){
     this.setTxt = popupSetTxt;
@@ -154,7 +158,7 @@ function queueFileLoad(event) {
 
 function queueComplete(event) {
   console.log("Finished loading resources");
-  bg = new createjs.Bitmap(imgByName("background.svg"));
+  bg = new createjs.Bitmap(imgByName("background.jpg"));
   stage.addChild(bg);
   
   buttonOk = new createjs.Bitmap(imgByName("button_checked.png"));
@@ -277,16 +281,22 @@ function getRandomColor(cn,cs){
   t['R'] = 0;
   t['Y'] = 0;
   t['B'] = 0;
-  for (var i=0; i<cn; i++){
-    c = Math.floor(Math.random()*allColors.length);
-    if (maxClicks !=1){
-      t[allColors[c]] = Math.floor(Math.random()*maxClicks)*cs;
+  while (targetColors.indexOf(ryb2hex(t))>=0){
+    t['R'] = 0;
+    t['Y'] = 0;
+    t['B'] = 0;    
+    for (var i=0; i<cn; i++){
+      c = Math.floor(Math.random()*allColors.length);
+      if (maxClicks !=1){
+        t[allColors[c]] = Math.floor(Math.random()*maxClicks)*cs;
+      }
+      else{//only for first level
+        t[allColors[c]] = 100;
+      }
+      allColors.slice(c,1);
     }
-    else{//only for first level
-      t[allColors[c]] = 100;
-    }
-    allColors.slice(c,1);
   }
+  targetColors.push(ryb2hex(t));
   return(t);
 }
 
@@ -378,9 +388,9 @@ function subWorkingColor(c){
 
 
 function initLevel(newLevel) {
-  //Level config
-  var colorStep = [100,100,100,100,100,50,50,25,25];
-  var colorNum  = [  1,  2,  3,  3,  3, 2, 3, 2, 3];
+  if (newLevel == 0){
+    targetColors = ["#ffffff"];//no color has been played yet
+  }
   lvlColorNum = colorNum[newLevel];
   lvlColorStep = colorStep[newLevel];
   targetrybs = getRandomColor(lvlColorNum,lvlColorStep);
@@ -557,11 +567,11 @@ function onMenuHome(event) {
 }
 
 function onMenuPrevious(event) {
-  initLevel((level+7) % 9);
+  initLevel((level+colorStep.length-1) % colorStep.length);
 }
 
 function onMenuNext(event) {
-  initLevel((level+1) % 9);
+  initLevel((level+1) % colorStep.length);
 }
 
 </script>
