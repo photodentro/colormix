@@ -35,7 +35,7 @@
   var stage;
   var statusText = "";
   var resourceNames = ["background.jpg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg",
-                       "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg","popup.svg"];
+                       "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg","popup.svg", "lion_good.svg", ];
   var resourcesLoaded = 0;
   var resources = [];
   var ratio = 16/9;
@@ -67,6 +67,8 @@
   var popupTxt;
   var pu;
   var targetColors = [];
+  var imgSuccess;
+  var success;
 
   function popup(){
     this.setTxt = popupSetTxt;
@@ -185,6 +187,9 @@ function queueComplete(event) {
       pu.show();      
     }
     else{
+      success = true;
+      imgSuccess.visible = true;
+      stage.addChild(imgSuccess);
       setTimeout(onMenuNext,1000);
     }
 
@@ -267,10 +272,14 @@ function queueComplete(event) {
   popupTxt = new createjs.Text(this.txt,'20px Arial', 'white');
   popupCont.addChild(popupBkg);
 
+
+  imgSuccess = new createjs.Bitmap(imgByName('lion_good.svg'));  
+  imgSuccess.visible = false;
   stage.update();
   initLevel(0);
   resize();
   window.addEventListener('resize', resize, false);
+  createjs.Ticker.on("tick", tick);
 }
 
 function getRandomColor(cn,cs){
@@ -311,7 +320,6 @@ function ryb2hex(rybsDict){
   r = rybsDict['R']/100;
   y = rybsDict['Y']/100;
   b = rybsDict['B']/100;
-  console.log(r,y,b);
   rgb_red   = getR(r,y,b);
   rgb_green = getG(r,y,b);
   rgb_blue  = getB(r,y,b);
@@ -497,9 +505,9 @@ function resize() {
 
 
   for (var i=0; i<3; i++){
-    pluses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width/2)/pluses[i].image.width;
+    pluses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width*0.8)/pluses[i].image.width;
     pluses[i].scaleY = pluses[i].scaleX;
-    minuses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width/2)/minuses[i].image.width;
+    minuses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width*0.8)/minuses[i].image.width;
     minuses[i].scaleY = minuses[i].scaleX;
     pluses[i].regX = pluses[i].image.width/2;
     pluses[i].regY = pluses[i].image.height/2;
@@ -543,7 +551,12 @@ function resize() {
   buttonOk.savedscaleX = buttonOk.scaleX;
   buttonOk.savedscaleY = buttonOk.scaleY;
 
-  
+  imgSuccess.scaleY = (2/3) * stage.canvas.height / imgSuccess.image.height;
+  imgSuccess.scaleX = imgSuccess.scaleY;
+  imgSuccess.regX = imgSuccess.image.width / 2;
+  imgSuccess.regY = imgSuccess.image.height / 2;
+  imgSuccess.x = stage.canvas.width / 2;
+  imgSuccess.y = stage.canvas.height / 2;
 
   //If there is popup resize it
   if (pu){
@@ -571,9 +584,21 @@ function onMenuPrevious(event) {
 }
 
 function onMenuNext(event) {
+  success = false;
+  imgSuccess.visible = false;
   initLevel((level+1) % colorStep.length);
 }
 
+function tick(){
+  if (success){
+    imgSuccess.scaleX *= 1.01;
+    imgSuccess.scaleY *= 1.01;
+  }
+  else{
+  }
+  stage.update();
+  
+}
 </script>
 </body>
 </html>
