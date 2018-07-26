@@ -34,11 +34,11 @@
 <script>
   var stage;
   var statusText = "";
-  var resourceNames = ["background.jpg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg",
-                       "tubeb.png","tubey.png","tuber.png","button_checked.png","plus.svg","minus.svg","popup.svg", "lion_good.svg", ];
+  var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg","buttonOK.svg",
+      "redPlus.svg", "redMinus.svg", "yellowPlus.svg", "yellowMinus.svg", "bluePlus.svg", "blueMinus.svg", "popup.svg", "lion_good.svg", ];
   var resourcesLoaded = 0;
   var resources = [];
-  var ratio = 16/9;
+  var ratio = 13/9;
   var winratio;
   var boxl;
   var boxr;
@@ -47,9 +47,6 @@
   var level = 0; 
   var bg;
   var buttonOk;
-  var tubes = [];
-  var pluses = [];
-  var minuses = [];
   var radius;
   var explainText;
   //Level config
@@ -69,6 +66,12 @@
   var targetColors = [];
   var imgSuccess;
   var success;
+  var redPlus;
+  var redMinus;
+  var yellowPlus;
+  var yellowMinus;
+  var bluePlus;
+  var blueMinus;
 
   function popup(){
     this.setTxt = popupSetTxt;
@@ -95,7 +98,7 @@
     popupBkg.scaleX = stage.canvas.width/1280;
     popupBkg.scaleY = stage.canvas.height/720;
     var h = new createjs.Shape();
-    h.graphics.beginFill('#000').drawRect(650/720*popupBkg.image.width,0,60/720*popupBkg.image.width,50/260*popupBkg.image.height);
+    h.graphics.beginFill('#000').drawRect(650/720*popupBkg.image.width,0,90/720*popupBkg.image.width,80/260*popupBkg.image.height);
     popupBkg.hitArea = h;
     popupCont.width = popupBkg.width;
     popupCont.height = popupBkg.height;   
@@ -160,10 +163,10 @@ function queueFileLoad(event) {
 
 function queueComplete(event) {
   console.log("Finished loading resources");
-  bg = new createjs.Bitmap(imgByName("background.jpg"));
+  bg = new createjs.Bitmap(imgByName("background.svg"));
   stage.addChild(bg);
   
-  buttonOk = new createjs.Bitmap(imgByName("button_checked.png"));
+  buttonOk = new createjs.Bitmap(imgByName("buttonOK.svg"));
   buttonOk.addEventListener('click',function(event){
     var msg = "Χρειάζεται:\n";
     var cnames = {'R':'κόκκινο','Y':'κίτρινο','B':'μπλε'};
@@ -208,6 +211,8 @@ function queueComplete(event) {
 
   stage.addChild(buttonOk);
   var onMenuClick = [onMenuHome, onMenuHelp, onMenuAbout, onMenuPrevious, onMenuNext];
+  //initialize all 5 together
+  //they are resized in two groups in function resize()
   for (i = 0; i < 5; i++) {
 
     menubar[i] = new createjs.Bitmap(resources[resourceNames.indexOf('bar_home.svg')+i]);
@@ -235,39 +240,45 @@ function queueComplete(event) {
   explainText.textAlign = "center";
   explainText.textBaseline = "middle";
   stage.addChild(explainText);
-  for (var i=0; i<3; i++){
-    tubes[i] = new createjs.Bitmap(resources[resourceNames.indexOf('tubeb.png')+i]);
-    stage.addChild(tubes[i]);
-  }
 
   ci = ['B','Y','R'];
-  for (var i=0; i<3; i++){
-    pluses[i] = new createjs.Bitmap(imgByName('plus.svg'));
-    minuses[i] = new createjs.Bitmap(imgByName('minus.svg'));
-  }
-  pluses[0].addEventListener('click',function(){
-    addWorkingColor('B');
-  });
-  pluses[1].addEventListener('click',function(){
-    addWorkingColor('Y');
-  });
-  pluses[2].addEventListener('click',function(){
+  redPlus = new createjs.Bitmap(imgByName('redPlus.svg'));
+  redPlus.on('click', function(){
     addWorkingColor('R');
   });
-  minuses[0].addEventListener('click',function(){
-    subWorkingColor('B');
-  });
-  minuses[1].addEventListener('click',function(){
-    subWorkingColor('Y');
-  });
-  minuses[2].addEventListener('click',function(){
+  stage.addChild(redPlus);
+
+  redMinus = new createjs.Bitmap(imgByName('redMinus.svg'));
+  redMinus.on('click', function(){
     subWorkingColor('R');
   });
+  stage.addChild(redMinus);
 
-  for (var i=0; i<3; i++){
-    stage.addChild(pluses[i]);
-    stage.addChild(minuses[i]);
-  }
+  yellowPlus = new createjs.Bitmap(imgByName('yellowPlus.svg'));
+  yellowPlus.on('click', function(){
+    addWorkingColor('Y');
+  });
+  stage.addChild(yellowPlus);
+
+  yellowMinus = new createjs.Bitmap(imgByName('yellowMinus.svg'));
+  yellowMinus.on('click', function(){
+    subWorkingColor('Y');
+  });
+  stage.addChild(yellowMinus);
+
+  bluePlus = new createjs.Bitmap(imgByName('bluePlus.svg'));
+  bluePlus.on('click', function(){
+    addWorkingColor('B');
+  });
+  stage.addChild(bluePlus);
+
+  blueMinus = new createjs.Bitmap(imgByName('blueMinus.svg'));
+  blueMinus.on('click', function(){
+    subWorkingColor('B');
+  });
+  stage.addChild(blueMinus);
+
+
   popupBkg = new createjs.Bitmap(imgByName('popup.svg'));
   popupTxt = new createjs.Text(this.txt,'20px Arial', 'white');
   popupCont.addChild(popupBkg);
@@ -378,10 +389,11 @@ function ryb2hex(rybsDict){
   }
 
 function addWorkingColor(c){
+
   if (workingrybs[c] + lvlColorStep <= 100){
     workingrybs[c] += lvlColorStep;
   }
-  workingCircle.graphics.beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/3,radius);
+  drawWorkingCircle();
   stage.update();
 
 }
@@ -390,8 +402,7 @@ function subWorkingColor(c){
   if (workingrybs[c] - lvlColorStep >= 0){
     workingrybs[c] -= lvlColorStep;
   }
-  workingCircle.graphics.beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/3,radius);
-  stage.update();
+  drawWorkingCircle();
 }
 
 
@@ -409,7 +420,12 @@ function initLevel(newLevel) {
 
 
 }
-
+function drawWorkingCircle(){
+    workingCircle.graphics.clear();
+    workingCircle.graphics.setStrokeStyle(4).beginStroke("lightgray").beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2 + stage.canvas.width / 500,stage.canvas.height * 0.37,radius).endStroke();
+    stage.addChild(workingCircle);
+    stage.update();
+  }
 function resize() {
   // Resize the canvas element
   winratio = window.innerWidth/window.innerHeight;
@@ -432,11 +448,13 @@ function resize() {
   else{
     statusText.visible = false;
   }
+  bg.scaleX = stage.canvas.width / bg.image.width;
+  bg.scaleY = stage.canvas.height / bg.image.height;
 
   var bbs = stage.canvas.height / 10;  // bar button size
   var bbm = bbs / 5;  // bar button margin
   // TODO: local/global variables, eslint...
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 3; i++) {
     // Leave one space for the level
     if (i < 4)
       j = i;
@@ -452,10 +470,27 @@ function resize() {
     menubar[i].savedscaleX = menubar[i].scaleX;
     menubar[i].savedscaleY = menubar[i].scaleY;
   }
+  for (i = 3; i < 5; i++) {
+    // Leave one space for the level
+    if (i < 4)
+      j = i;
+    else
+      j = i + 1;
+    menubar[i].scaleX = bbs / menubar[i].image.width;
+    menubar[i].scaleY = bbs / menubar[i].image.height;
+    menubar[i].regX = menubar[i].image.width / 2;
+    menubar[i].regY = menubar[i].image.height / 2;
+    menubar[i].x = stage.canvas.width / 2 + (j + 1)*bbm + bbs/2 + j*bbs;
+    menubar[i].y = stage.canvas.height - bbm - bbs/2;
+    // These copies are used to preserve the original scale on mouseover
+    menubar[i].savedscaleX = menubar[i].scaleX;
+    menubar[i].savedscaleY = menubar[i].scaleY;
+  }
+
 
   lvlText.text = level + 1;
-  lvlText.x = (4 + 1)*bbm + bbs/2 + 4*bbs;
-  lvlText.y = stage.canvas.height - bbm/2 - bbs/2;
+  lvlText.x = stage.canvas.width / 2  + bbs/2 + j*bbs
+  lvlText.y = stage.canvas.height - bbm - bbs/2;
   lvlText.font = parseInt(2*bbs/2) + "px Arial";
 
   // If level is single digit, move lvlText and bar_previous a bit left
@@ -466,88 +501,69 @@ function resize() {
 
 
   explainText.x = stage.canvas.width / 4;
-  explainText.y = stage.canvas.height / 6;
+  explainText.y = stage.canvas.height / 7;
   explainText.font = parseInt(bbs/2) + "px Arial";
 
-  radius = (stage.canvas.height / 2 - bbs) / 4;
-  for (var i=0; i<3; i++){
-    tubes[i].scaleY = ((stage.canvas.height * 2/3) - bbs - 2*radius) / tubes[i].image.width;
-    tubes[i].scaleX = tubes[i].scaleY;
-    tubes[i].regX = tubes[i].image.width/2;
-    tubes[i].regY = tubes[i].image.height/2;
-  }
-
-
-  //red
-  tubes[2].x = stage.canvas.width / 2 - radius - tubes[2].image.width*tubes[2].scaleX/2;
-  tubes[2].y = stage.canvas.height / 3;
-  //yellow
-  tubes[1].x = stage.canvas.width / 2;
-  tubes[1].y = stage.canvas.height / 3 + stage.canvas.height /4 + stage.canvas.height/35;
-  tubes[1].rotation = 270;
-  tubes[0].x = stage.canvas.width / 2 + radius + tubes[0].image.width*tubes[0].scaleX/2;
-  tubes[0].y = stage.canvas.height /3;
-  tubes[0].rotation = 180;
-  for (var i=0; i<3; i++){
-    stage.addChild(tubes[i]);
-  }
+  radius = stage.canvas.height * 0.14;
 
   
   targetCircle.graphics.clear();
-  targetCircle.graphics.beginFill(ryb2hex(targetrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/8,radius);
+  targetCircle.graphics.beginFill(ryb2hex(targetrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/8,radius * 0.7);
   stage.addChild(targetCircle);
 
   
-  workingCircle.graphics.clear();
-  workingCircle.graphics.beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/3,radius);
-  stage.addChild(workingCircle);
+  redPlus.scaleX = bg.scaleX;
+  redPlus.scaleY = bg.scaleY;
+  redPlus.x = stage.canvas.width*0.28;
+  redPlus.y = stage.canvas.height * 0.35;
+  stage.addChild(redPlus);
 
+  redMinus.scaleX = bg.scaleX;
+  redMinus.scaleY = bg.scaleY;
+  redMinus.x = stage.canvas.width * 0.22;
+  redMinus.y = stage.canvas.height * 0.35;
+  stage.addChild(redMinus);
 
-
-  for (var i=0; i<3; i++){
-    pluses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width*0.8)/pluses[i].image.width;
-    pluses[i].scaleY = pluses[i].scaleX;
-    minuses[i].scaleX = (menubar[0].scaleX*menubar[0].image.width*0.8)/minuses[i].image.width;
-    minuses[i].scaleY = minuses[i].scaleX;
-    pluses[i].regX = pluses[i].image.width/2;
-    pluses[i].regY = pluses[i].image.height/2;
-    minuses[i].regX = minuses[i].image.width/2;
-    minuses[i].regY = minuses[i].image.height/2;
-  }
-
-  //red
-  var tubeWidth = tubes[2].image.width*tubes[2].scaleX;
-  pluses[2].x = tubes[2].x + tubeWidth / 2 - tubeWidth / 3;
-  minuses[2].x = tubes[2].x - tubeWidth / 2 + tubeWidth / 4;
-  pluses[2].y = stage.canvas.height / 3;
-  minuses[2].y = stage.canvas.height / 3;
-  stage.setChildIndex(pluses[2],stage.numChildren-1);
-  stage.setChildIndex(minuses[2],stage.numChildren-1);
+  yellowPlus.scaleX = bg.scaleX;
+  yellowPlus.scaleY = bg.scaleY;
+  yellowPlus.x = stage.canvas.width * 0.48;
+  yellowPlus.y = stage.canvas.height * 0.65;
+  stage.addChild(yellowPlus);
   
-  //yellow
-  pluses[1].x = stage.canvas.width/2;
-  pluses[1].y = tubes[1].y - tubeWidth / 5;
-  minuses[1].x = stage.canvas.width/2;
-  minuses[1].y = tubes[1].y + tubeWidth / 3;
-  stage.setChildIndex(pluses[1],stage.numChildren-1);
-  stage.setChildIndex(minuses[1],stage.numChildren-1);  
-  //blue
-  pluses[0].x = tubes[0].x - tubeWidth / 6;
-  pluses[0].y = stage.canvas.height /3;
-  minuses[0].x = tubes[0].x + tubeWidth / 4;
-  minuses[0].y = stage.canvas.height /3;
-  stage.setChildIndex(pluses[0],stage.numChildren-1);
-  stage.setChildIndex(minuses[0],stage.numChildren-1);
+  yellowMinus.scaleX = bg.scaleX;
+  yellowMinus.scaleY = bg.scaleY;
+  yellowMinus.x = stage.canvas.width * 0.48;
+  yellowMinus.y = stage.canvas.height * 0.73;
+  stage.addChild(yellowMinus);
+  
+  bluePlus.scaleX = bg.scaleX;
+  bluePlus.scaleY = bg.scaleY;
+  bluePlus.x = stage.canvas.width * 0.69;
+  bluePlus.y = stage.canvas.height * 0.35;
+  stage.addChild(bluePlus);
 
-  buttonOk.scaleX = 2*menubar[0].scaleX;
-  buttonOk.scaleY = 2*menubar[0].scaleY;
+  blueMinus.scaleX = bg.scaleX;
+  blueMinus.scaleY = bg.scaleY;
+  blueMinus.x = stage.canvas.width * 0.74;
+  blueMinus.y = stage.canvas.height * 0.35;
+  stage.addChild(blueMinus);
+
+  stage.update();
+  drawWorkingCircle();
+
+
+
+
+
+  buttonOk.scaleX = menubar[0].scaleX;
+  buttonOk.scaleY = menubar[0].scaleY;
   var hit = new createjs.Shape();
-  hit.graphics.beginFill("000").drawRect(0,0,buttonOk.scaleX*buttonOk.image.width,buttonOk.scaleY*buttonOk.image.height);
+  hit.graphics.beginFill("000").drawRect(0,0,buttonOk.image.width,buttonOk.image.height);
   buttonOk.hitArea = hit;
   buttonOk.regX = buttonOk.image.width/2;
   buttonOk.regY = buttonOk.image.height/2;
   buttonOk.x = stage.canvas.width * 3/4;
-  buttonOk.y = stage.canvas.height * 3/4;
+  buttonOk.y = stage.canvas.height * 2/3;
   buttonOk.savedscaleX = buttonOk.scaleX;
   buttonOk.savedscaleY = buttonOk.scaleY;
 
@@ -563,8 +579,6 @@ function resize() {
   pu.resize();
   }
   // Fill all the canvas with the background
-  bg.scaleX = stage.canvas.width / bg.image.width;
-  bg.scaleY = stage.canvas.height / bg.image.height;
   stage.update();
 }
 function onMenuAbout(event) {
