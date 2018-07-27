@@ -35,7 +35,7 @@
   var stage;
   var statusText = "";
   var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg","buttonOK.svg",
-      "redPlus.svg", "redMinus.svg", "yellowPlus.svg", "yellowMinus.svg", "bluePlus.svg", "blueMinus.svg", "popup.svg", "lion_good.svg", ];
+      "redPlus.svg", "redMinus.svg", "yellowPlus.svg", "yellowMinus.svg", "bluePlus.svg", "blueMinus.svg", "popup.svg", "palette_good.svg", ];
   var resourcesLoaded = 0;
   var resources = [];
   var ratio = 13/9;
@@ -230,7 +230,7 @@ function queueComplete(event) {
     stage.addChild(menubar[i]);
     
   }
-  lvlText = new createjs.Text("1", "20px Arial", "black");
+  lvlText = new createjs.Text("1", "20px Arial", "#840D99");
   lvlText.textAlign = "center";
   lvlText.textBaseline = "middle";
   stage.addChild(lvlText);
@@ -284,7 +284,7 @@ function queueComplete(event) {
   popupCont.addChild(popupBkg);
 
 
-  imgSuccess = new createjs.Bitmap(imgByName('lion_good.svg'));  
+  imgSuccess = new createjs.Bitmap(imgByName('palette_good.svg'));  
   imgSuccess.visible = false;
   stage.update();
   initLevel(0);
