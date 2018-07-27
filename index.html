@@ -50,8 +50,8 @@
   var radius;
   var explainText;
   //Level config
-  var colorStep = [100,100,100,100,100,50,50,25,25, 12.5, 12.5, 12.5  ];
-  var colorNum  = [  1,  2,  3,  3,  3, 2, 3, 2, 3, 2   ,    3,    3  ];  
+  var colorStep = [100, 100, 100, 100, 100, 100, 50, 50, 50, 50, 25, 25, 25, 25];
+  var colorNum  = [  1,   1,   2,   2,   3,   3,  2,  2,  3,  3,  2,  3,  3,  3];  
   var lvlColorStep;
   var lvlColorNum;
   var targetrybs = {};
@@ -297,6 +297,7 @@ function getRandomColor(cn,cs){
   //colornum and colorstep
   var t = {};
   maxClicks = Math.floor(100.0/cs);
+  console.log(maxClicks);
   var allColors = ['R','Y','B'];
   t['R'] = 0;
   t['Y'] = 0;
@@ -308,13 +309,19 @@ function getRandomColor(cn,cs){
     for (var i=0; i<cn; i++){
       c = Math.floor(Math.random()*allColors.length);
       if (maxClicks !=1){
-        t[allColors[c]] = Math.floor(Math.random()*maxClicks)*cs;
+        if (cn = 3){
+          t[allColors[c]] = cs + Math.floor(Math.random()*(maxClicks-1))*cs;
+        }
+        else{
+          t[allColors[c]] = Math.floor(Math.random()*maxClicks)*cs; 
+        }
       }
       else{//only for first level
         t[allColors[c]] = 100;
       }
       allColors.slice(c,1);
     }
+    console.log(ryb2hex(t));
   }
   targetColors.push(ryb2hex(t));
   return(t);
@@ -456,15 +463,11 @@ function resize() {
   // TODO: local/global variables, eslint...
   for (i = 0; i < 3; i++) {
     // Leave one space for the level
-    if (i < 4)
-      j = i;
-    else
-      j = i + 1;
     menubar[i].scaleX = bbs / menubar[i].image.width;
     menubar[i].scaleY = bbs / menubar[i].image.height;
     menubar[i].regX = menubar[i].image.width / 2;
     menubar[i].regY = menubar[i].image.height / 2;
-    menubar[i].x = (j + 1)*bbm + bbs/2 + j*bbs;
+    menubar[i].x = (i + 1)*bbm + bbs/2 + i*bbs;
     menubar[i].y = stage.canvas.height - bbm - bbs/2;
     // These copies are used to preserve the original scale on mouseover
     menubar[i].savedscaleX = menubar[i].scaleX;
