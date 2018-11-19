@@ -12,9 +12,9 @@
    preserveAspectRatio="none"
    x="0px"
    y="0px"
-   width="2046"
-   height="1423.55"
-   viewBox="0 0 2046 1423.55"
+   width="2567.3413"
+   height="1444.8896"
+   viewBox="0 0 2567.3413 1444.8896"
    id="svg170"
    sodipodi:docname="background.svg"
    inkscape:version="0.92.3 (2405546, 2018-03-11)">
@@ -26,7 +26,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -47,9 +47,9 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="1.2586667"
-     inkscape:cx="1362.8889"
-     inkscape:cy="1235.3691"
+     inkscape:zoom="0.22250294"
+     inkscape:cx="908.91144"
+     inkscape:cy="995.73851"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -415,18 +415,38 @@
          inkscape:connector-curvature="0"
          style="fill:#b9bab9;stroke:none" />
     </g>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath918">
+      <rect
+         style="opacity:0.43200001;fill:#c0e00d;fill-opacity:1;stroke:#554345;stroke-width:2.0647974;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:8.2591899, 2.06479747;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect920"
+         width="2044.3728"
+         height="1147.4633"
+         x="-5.5112333"
+         y="122.61202" />
+    </clipPath>
   </defs>
   <rect
      style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:7.57806683;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
      id="rect905"
      width="2046"
      height="1426.9005"
-     x="0"
-     y="-3.3504238"
+     x="85.392128"
+     y="65.249741"
      rx="0"
      ry="0" />
+  <rect
+     style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#554345;stroke-width:2.5999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:10.4, 2.60000000000000009;stroke-dashoffset:0;stroke-opacity:1"
+     id="rect922"
+     width="2575.2468"
+     height="1469.6436"
+     x="4.4943228"
+     y="-6.7765632" />
   <g
-     id="g168">
+     id="g168"
+     transform="matrix(1.2592034,0,0,1.2592034,0,-154.39348)"
+     clip-path="url(#clipPath918)">
     <g
        id="g148">
       <use

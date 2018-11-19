@@ -34,11 +34,12 @@
 <script>
   var stage;
   var statusText = "";
-  var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_previous.svg", "bar_next.svg","buttonOK.svg",
+  var resourceNames = ["background.svg","bar_home.svg", "bar_help.svg", "bar_about.svg", "bar_fullscreen.svg", "bar_previous.svg", 
+  "bar_next.svg", "buttonOK.svg",
       "redPlus.svg", "redMinus.svg", "yellowPlus.svg", "yellowMinus.svg", "bluePlus.svg", "blueMinus.svg", "popup.svg", "palette_good.svg", ];
   var resourcesLoaded = 0;
   var resources = [];
-  var ratio = 13/9;
+  var ratio = 16/9;
   var winratio;
   var boxl;
   var boxr;
@@ -72,6 +73,7 @@
   var yellowMinus;
   var bluePlus;
   var blueMinus;
+  var helpOn = false;
 
   function popup(){
     this.setTxt = popupSetTxt;
@@ -81,6 +83,9 @@
     //this.resize = popupResize;
   }
   function popupHide(){
+  	if (helpOn){
+  		helpOn = false;
+  	}
     popupBkg.visible = false;
     popupTxt.visible = false;
     stage.update();
@@ -168,52 +173,52 @@ function queueComplete(event) {
   
   buttonOk = new createjs.Bitmap(imgByName("buttonOK.svg"));
   buttonOk.addEventListener('click',function(event){
-    var msg = "Χρειάζεται:\n";
-    var cnames = {'R':'κόκκινο','Y':'κίτρινο','B':'μπλε'};
-    for (i = 0; i<Object.keys(cnames).length; i++){
-      var item = Object.keys(cnames)[i];
-      if (workingrybs[item]<targetrybs[item]){
-        msg += "Περισσότερο " + cnames[item];
-      }
-      else{
-        if (workingrybs[item]>targetrybs[item]){
-          msg += "Λιγότερο " + cnames[item]
-        }
-      }
-      msg+="\n";
+  	if (!helpOn){
+	    var msg = "Χρειάζεται:\n";
+	    var cnames = {'R':'κόκκινο','Y':'κίτρινο','B':'μπλε'};
+	    for (i = 0; i<Object.keys(cnames).length; i++){
+	      var item = Object.keys(cnames)[i];
+	      if (workingrybs[item]<targetrybs[item]){
+	        msg += "Περισσότερο " + cnames[item];
+	      }
+	      else{
+	        if (workingrybs[item]>targetrybs[item]){
+	          msg += "Λιγότερο " + cnames[item]
+	        }
+	      }
+	      msg+="\n";
+	    }
+        if (ryb2hex(workingrybs) != ryb2hex(targetrybs)){
+	      pu = new popup();
+	      pu.setTxt(msg);
+	      pu.show();      
+	    }
+	    else{
+	      success = true;
+	      imgSuccess.visible = true;
+	      stage.addChild(imgSuccess);
+	      setTimeout(onMenuNext,1000);
+	    }
     }
-
-
-    if (ryb2hex(workingrybs) != ryb2hex(targetrybs)){
-      pu = new popup();
-      pu.setTxt(msg);
-      pu.show();      
-    }
-    else{
-      success = true;
-      imgSuccess.visible = true;
-      stage.addChild(imgSuccess);
-      setTimeout(onMenuNext,1000);
-    }
-
-
   });
   buttonOk.addEventListener("mouseover", function(event) {
+  	    if (!helpOn){
         // Bring the target on top in its container, mostly for the rotation animation
         event.target.parent.setChildIndex(event.target, event.target.parent.numChildren - 1);
         event.target.scaleX = 1.2*event.target.savedscaleX;
         event.target.scaleY = 1.2*event.target.savedscaleY;
-        stage.update();});
+        stage.update();}});
   buttonOk.addEventListener("mouseout", function(event) {
         event.target.scaleX = event.target.savedscaleX;
         event.target.scaleY = event.target.savedscaleY;
-        stage.update();});
+        stage.update();
+    });
 
   stage.addChild(buttonOk);
-  var onMenuClick = [onMenuHome, onMenuHelp, onMenuAbout, onMenuPrevious, onMenuNext];
+  var onMenuClick = [onMenuHome, onMenuHelp, onMenuAbout, onMenuFullScreen, onMenuPrevious, onMenuNext];
   //initialize all 5 together
   //they are resized in two groups in function resize()
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 6; i++) {
 
     menubar[i] = new createjs.Bitmap(resources[resourceNames.indexOf('bar_home.svg')+i]);
     menubar[i].addEventListener("click", onMenuClick[i]);
@@ -243,36 +248,54 @@ function queueComplete(event) {
 
   ci = ['B','Y','R'];
   redPlus = new createjs.Bitmap(imgByName('redPlus.svg'));
+  var h = new createjs.Shape();
+  h.graphics.beginFill("#000").drawRect(0,0,redPlus.image.width,redPlus.image.height);
+  redPlus.hitArea = h;
   redPlus.on('click', function(){
     addWorkingColor('R');
   });
   stage.addChild(redPlus);
 
   redMinus = new createjs.Bitmap(imgByName('redMinus.svg'));
+  var h = new createjs.Shape();
+  h.graphics.beginFill("#000").drawRect(0,0,redMinus.image.width,redMinus.image.height);
+  redMinus.hitArea = h;
   redMinus.on('click', function(){
     subWorkingColor('R');
   });
   stage.addChild(redMinus);
 
   yellowPlus = new createjs.Bitmap(imgByName('yellowPlus.svg'));
+  var h = new createjs.Shape();
+  h.graphics.beginFill("#000").drawRect(0,0,yellowPlus.image.width,yellowPlus.image.height);
+  yellowPlus.hitArea = h;
   yellowPlus.on('click', function(){
     addWorkingColor('Y');
   });
   stage.addChild(yellowPlus);
 
   yellowMinus = new createjs.Bitmap(imgByName('yellowMinus.svg'));
+  var h = new createjs.Shape();
+  h.graphics.beginFill("#000").drawRect(0,0,yellowMinus.image.width,yellowMinus.image.height);
+  yellowMinus.hitArea = h;
   yellowMinus.on('click', function(){
     subWorkingColor('Y');
   });
   stage.addChild(yellowMinus);
 
   bluePlus = new createjs.Bitmap(imgByName('bluePlus.svg'));
+  var h = new createjs.Shape();
+  h.graphics.beginFill("#000").drawRect(0,0,bluePlus.image.width,bluePlus.image.height);
+  bluePlus.hitArea = h;
   bluePlus.on('click', function(){
     addWorkingColor('B');
   });
   stage.addChild(bluePlus);
 
   blueMinus = new createjs.Bitmap(imgByName('blueMinus.svg'));
+  var h = new createjs.Shape();
+  h.graphics.beginFill("#000").drawRect(0,0,blueMinus.image.width,blueMinus.image.height);
+  blueMinus.hitArea = h;
   blueMinus.on('click', function(){
     subWorkingColor('B');
   });
@@ -396,20 +419,22 @@ function ryb2hex(rybsDict){
   }
 
 function addWorkingColor(c){
-
+  if (!helpOn){
   if (workingrybs[c] + lvlColorStep <= 100){
     workingrybs[c] += lvlColorStep;
   }
   drawWorkingCircle();
   stage.update();
-
+}
 }
 
 function subWorkingColor(c){
+	if (!helpOn){
   if (workingrybs[c] - lvlColorStep >= 0){
     workingrybs[c] -= lvlColorStep;
   }
   drawWorkingCircle();
+}
 }
 
 
@@ -429,7 +454,7 @@ function initLevel(newLevel) {
 }
 function drawWorkingCircle(){
     workingCircle.graphics.clear();
-    workingCircle.graphics.setStrokeStyle(4).beginStroke("lightgray").beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width / 2 + stage.canvas.width / 500,stage.canvas.height * 0.37,radius).endStroke();
+    workingCircle.graphics.setStrokeStyle(stage.canvas.height/100).beginStroke("lightgray").beginFill(ryb2hex(workingrybs)).drawCircle(stage.canvas.width * 0.503 + stage.canvas.width / 500,stage.canvas.height * 0.37,radius).endStroke();
     stage.addChild(workingCircle);
     stage.update();
   }
@@ -461,7 +486,7 @@ function resize() {
   var bbs = stage.canvas.height / 10;  // bar button size
   var bbm = bbs / 5;  // bar button margin
   // TODO: local/global variables, eslint...
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 4; i++) {
     // Leave one space for the level
     menubar[i].scaleX = bbs / menubar[i].image.width;
     menubar[i].scaleY = bbs / menubar[i].image.height;
@@ -473,9 +498,9 @@ function resize() {
     menubar[i].savedscaleX = menubar[i].scaleX;
     menubar[i].savedscaleY = menubar[i].scaleY;
   }
-  for (i = 3; i < 5; i++) {
+  for (i = 4; i < 6; i++) {
     // Leave one space for the level
-    if (i < 4)
+    if (i < 5)
       j = i;
     else
       j = i + 1;
@@ -492,14 +517,14 @@ function resize() {
 
 
   lvlText.text = level + 1;
-  lvlText.x = stage.canvas.width / 2  + bbs/2 + j*bbs
+  lvlText.x = stage.canvas.width / 2  + 10/3 * bbm + j*bbs
   lvlText.y = stage.canvas.height - bbm - bbs/2;
   lvlText.font = parseInt(2*bbs/2) + "px Arial";
 
   // If level is single digit, move lvlText and bar_previous a bit left
   if (level + 1 < 10) {
     lvlText.x -= bbs/4;
-    menubar[4].x -= bbs/2;
+    menubar[5].x -= bbs/2;
   }
 
 
@@ -511,44 +536,44 @@ function resize() {
 
   
   targetCircle.graphics.clear();
-  targetCircle.graphics.beginFill(ryb2hex(targetrybs)).drawCircle(stage.canvas.width / 2,stage.canvas.height/8,radius * 0.7);
+  targetCircle.graphics.beginFill(ryb2hex(targetrybs)).drawCircle(stage.canvas.width * 0.503,stage.canvas.height/8,radius * 0.7);
   stage.addChild(targetCircle);
 
   
   redPlus.scaleX = bg.scaleX;
   redPlus.scaleY = bg.scaleY;
   redPlus.x = stage.canvas.width*0.28;
-  redPlus.y = stage.canvas.height * 0.35;
+  redPlus.y = stage.canvas.height * 0.33;
   stage.addChild(redPlus);
 
   redMinus.scaleX = bg.scaleX;
   redMinus.scaleY = bg.scaleY;
   redMinus.x = stage.canvas.width * 0.22;
-  redMinus.y = stage.canvas.height * 0.35;
+  redMinus.y = stage.canvas.height * 0.33;
   stage.addChild(redMinus);
 
   yellowPlus.scaleX = bg.scaleX;
   yellowPlus.scaleY = bg.scaleY;
-  yellowPlus.x = stage.canvas.width * 0.48;
-  yellowPlus.y = stage.canvas.height * 0.65;
+  yellowPlus.x = stage.canvas.width * 0.485;
+  yellowPlus.y = stage.canvas.height * 0.72;
   stage.addChild(yellowPlus);
   
   yellowMinus.scaleX = bg.scaleX;
   yellowMinus.scaleY = bg.scaleY;
-  yellowMinus.x = stage.canvas.width * 0.48;
-  yellowMinus.y = stage.canvas.height * 0.73;
+  yellowMinus.x = stage.canvas.width * 0.485;
+  yellowMinus.y = stage.canvas.height * 0.82;
   stage.addChild(yellowMinus);
   
   bluePlus.scaleX = bg.scaleX;
   bluePlus.scaleY = bg.scaleY;
   bluePlus.x = stage.canvas.width * 0.69;
-  bluePlus.y = stage.canvas.height * 0.35;
+  bluePlus.y = stage.canvas.height * 0.33;
   stage.addChild(bluePlus);
 
   blueMinus.scaleX = bg.scaleX;
   blueMinus.scaleY = bg.scaleY;
   blueMinus.x = stage.canvas.width * 0.74;
-  blueMinus.y = stage.canvas.height * 0.35;
+  blueMinus.y = stage.canvas.height * 0.33;
   stage.addChild(blueMinus);
 
   stage.update();
@@ -585,37 +610,68 @@ function resize() {
   stage.update();
 }
 function onMenuAbout(event) {
-  window.open("credits/index_DS_II.html");
+  if (!helpOn)
+  	window.open("credits/index_DS_II.html");
 }
 
 function onMenuHelp(event) {
-  alert("Χρησιμοποιήστε τα + και τα - και ταιριάξτε τα χρώματα.");
+  if (!helpOn)
+	if (!pu){
+		pu = new popup();
+	}
+      pu.setTxt("Χρησιμοποιήστε τα + και τα - και\nκατασκευάστε το πάνω χρώμα.");
+      pu.show();
+      helpOn = true;
 }
 
 function onMenuHome(event) {
-  window.history.back();
+  if (!helpOn)
+  	window.history.back();
 }
 
 function onMenuPrevious(event) {
-  initLevel((level+colorStep.length-1) % colorStep.length);
+  if (!helpOn)
+  	initLevel((level+colorStep.length-1) % colorStep.length);
 }
 
 function onMenuNext(event) {
-  success = false;
-  imgSuccess.visible = false;
-  initLevel((level+1) % colorStep.length);
+	if (!helpOn){
+ 		success = false;
+  		imgSuccess.visible = false;
+  		initLevel((level+1) % colorStep.length);
+	}
 }
 
 function tick(){
   if (success){
     imgSuccess.scaleX *= 1.01;
     imgSuccess.scaleY *= 1.01;
+    stage.setChildIndex(imgSuccess,stage.numChildren-1);
   }
   else{
   }
   stage.update();
   
 }
+
+function onMenuFullScreen(){
+	if (!helpOn){
+	  var doc = window.document;
+	  var docEl = doc.documentElement;
+	  var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen
+	    || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+	  var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen
+	    || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+	  if (!doc.fullscreenElement && !doc.mozFullScreenElement
+	    && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+	    requestFullScreen.call(docEl);
+	  } else {
+	    cancelFullScreen.call(doc);
+	  }
+	}
+}
+
 </script>
 </body>
 </html>
