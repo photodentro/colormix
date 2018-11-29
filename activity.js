@@ -140,17 +140,18 @@ function onMinusBlue(event){
 function onButtonOk(event){
   var msg = "Χρειάζεται:<br/>";
   var cnames = {'R':'κόκκινο','Y':'κίτρινο','B':'μπλε'};
+  var enCnames = {'R':'red','Y':'yellow','B':'blue'};
   for (i = 0; i<Object.keys(cnames).length; i++){
     var item = Object.keys(cnames)[i];
     if (act.workingColor[item]<act.targetColor[item]){
-      msg += "Περισσότερο " + cnames[item];
+      msg += "<div style='color:" + enCnames[item] + ";text-shadow:1px 1px gray'> + " + cnames[item] + "</div><br/>";
     }
     else{
       if (act.workingColor[item]>act.targetColor[item]){
-        msg += "Λιγότερο " + cnames[item]
+        msg += "<div style='color:" + enCnames[item] + ";text-shadow:1px 1px gray'> - " + cnames[item] + "</div><br/>";
       }
     }
-    msg+="<br/>";
+    
   }
   if (ryb2rgb(act.workingColor,act.colorStep[act.level]) != ryb2rgb(act.targetColor,act.colorStep[act.level])){
     ge('help').innerHTML = '<div class="dialog">' + msg + '</div>';

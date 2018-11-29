@@ -210,7 +210,7 @@ body {
 #help .dialog {
   text-align: center;
   width: 19em;
-  background-color: white;
+  background-color: rgb(255,255,255);
   color: black;
   padding: 1em;
   border: 0.2em solid rgb(80,80,80);
