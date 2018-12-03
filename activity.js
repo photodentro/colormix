@@ -66,6 +66,8 @@ function onHome(event) {
 }
 
 function onHelp(event) {
+  ge('dialog').style.display = 'flex';
+  ge('feedback').style.display = 'none';
   ge('help').style.display = 'flex';
 }
 
@@ -154,7 +156,9 @@ function onButtonOk(event){
     
   }
   if (ryb2rgb(act.workingColor,act.colorStep[act.level]) != ryb2rgb(act.targetColor,act.colorStep[act.level])){
-    ge('help').innerHTML = '<div class="dialog">' + msg + '</div>';
+    ge('dialog').style.display = 'none';
+    ge('feedback').innerHTML = msg;
+    ge('feedback').style.display = '';
     ge('help').style.display = 'flex';
   }
   else{

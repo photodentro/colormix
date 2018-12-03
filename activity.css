@@ -207,7 +207,7 @@ body {
   right: 0;
 }
 
-#help .dialog {
+#help #dialog {
   text-align: center;
   width: 19em;
   background-color: rgb(255,255,255);
@@ -219,6 +219,21 @@ body {
   filter: drop-shadow(0.5em 0.5em 0.5em rgb(80,80,80));
   font-size: 2em;
 }
+
+#help #feedback {
+  text-align: center;
+  width: 19em;
+  background-color: rgb(255,255,255);
+  color: black;
+  padding: 1em;
+  border: 0.2em solid rgb(80,80,80);
+  border-radius: 0.5em;
+  -webkit-filter: drop-shadow(0.5em 0.5em 0.5em rgb(80,80,80));
+  filter: drop-shadow(0.5em 0.5em 0.5em rgb(80,80,80));
+  font-size: 2em;
+}
+
+
 #cont{
   position:relative;
 }
