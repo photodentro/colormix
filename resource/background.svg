@@ -17,7 +17,7 @@
    viewBox="0 0 2567.3413 1444.8896"
    id="svg170"
    sodipodi:docname="background.svg"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <metadata
      id="metadata174">
     <rdf:RDF>
@@ -444,60 +444,45 @@
      x="4.4943228"
      y="-6.7765632" />
   <g
-     id="g168"
-     transform="matrix(1.2657933,0,0,1.2592034,-13.482968,-154.39348)"
-     clip-path="url(#clipPath918)">
+     id="g154"
+     transform="matrix(1.4140512,0,0,1.4066895,1834.4487,528.91325)">
     <g
-       id="g148">
+       id="g152">
       <use
-         xlink:href="#Symbol_9_0_Layer0_0_FILL"
-         id="use146"
-         x="0"
-         y="0"
+         height="100%"
          width="100%"
-         height="100%" />
+         y="0"
+         x="0"
+         id="use150"
+         xlink:href="#Symbol_1_copy_3_0_Layer0_0_FILL" />
     </g>
+  </g>
+  <g
+     id="g160"
+     transform="matrix(0,1.4066895,-1.4140512,0,1287.0564,1082.8368)">
     <g
-       transform="matrix(1.1171265,0,0,1.1171265,1459.9,542.65)"
-       id="g154">
-      <g
-         id="g152">
-        <use
-           xlink:href="#Symbol_1_copy_3_0_Layer0_0_FILL"
-           id="use150"
-           x="0"
-           y="0"
-           width="100%"
-           height="100%" />
-      </g>
+       id="g158">
+      <use
+         height="100%"
+         width="100%"
+         y="0"
+         x="0"
+         id="use156"
+         xlink:href="#Symbol_1_0_Layer0_0_FILL" />
     </g>
+  </g>
+  <g
+     id="g166"
+     transform="matrix(-1.4140512,0,0,-1.4066895,741.37287,531.87237)">
     <g
-       transform="matrix(0,1.1171265,-1.1171265,0,1027.45,982.55)"
-       id="g160">
-      <g
-         id="g158">
-        <use
-           xlink:href="#Symbol_1_0_Layer0_0_FILL"
-           id="use156"
-           x="0"
-           y="0"
-           width="100%"
-           height="100%" />
-      </g>
-    </g>
-    <g
-       transform="matrix(-1.1171265,0,0,-1.1171265,596.35,545)"
-       id="g166">
-      <g
-         id="g164">
-        <use
-           xlink:href="#Symbol_1_copy_6_0_Layer0_0_FILL"
-           id="use162"
-           x="0"
-           y="0"
-           width="100%"
-           height="100%" />
-      </g>
+       id="g164">
+      <use
+         height="100%"
+         width="100%"
+         y="0"
+         x="0"
+         id="use162"
+         xlink:href="#Symbol_1_copy_6_0_Layer0_0_FILL" />
     </g>
   </g>
 </svg>
